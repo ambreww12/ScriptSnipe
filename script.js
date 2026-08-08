@@ -27,6 +27,27 @@ function typeWriter() {
 // Start typing after a tiny delay so the page feels ready
 setTimeout(typeWriter, 400);
 
+// Smooth scroll for navigation links (accounts for sticky nav height)
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function (e) {
+    const targetId = this.getAttribute('href');
+    if (targetId === '#') return;
+
+    const target = document.querySelector(targetId);
+    if (target) {
+      e.preventDefault();
+
+      const navHeight = document.querySelector('.nav').offsetHeight;
+      const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - navHeight - 12;
+
+      window.scrollTo({
+        top: targetPosition,
+        behavior: 'smooth'
+      });
+    }
+  });
+});
+
 // Waitlist form
 document.getElementById('waitlistForm').addEventListener('submit', function (e) {
   e.preventDefault();
