@@ -48,54 +48,39 @@ const saveBadge = document.querySelector('.save-badge');
 const MONTHLY = 2.99;
 const YEARLY = 19.99;
 
-let currentValue = MONTHLY;
-let rafId = null;
+let proCurrent = MONTHLY;
+let proRaf = null;
 
-function renderPrice(value) {
+function renderPro(value) {
   proPriceDisplay.textContent = '$' + value.toFixed(2);
 }
 
-function tick(now) {
-  if (!rafId) return;
-
-  const start = tick.start;
-  const from = tick.from;
-  const to = tick.to;
+function animatePro(to) {
+  if (proRaf) cancelAnimationFrame(proRaf);
+  const from = proCurrent;
+  const start = performance.now();
   const duration = 380;
 
-  const progress = Math.min((now - start) / duration, 1);
-  const eased = 1 - Math.pow(1 - progress, 3);
-  currentValue = from + (to - from) * eased;
-  renderPrice(currentValue);
-
-  if (progress < 1) {
-    rafId = requestAnimationFrame(tick);
-  } else {
-    currentValue = to;
-    renderPrice(to);
-    rafId = null;
+  function step(now) {
+    const t = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - t, 3);
+    proCurrent = from + (to - from) * eased;
+    renderPro(proCurrent);
+    if (t < 1) {
+      proRaf = requestAnimationFrame(step);
+    } else {
+      proCurrent = to;
+      renderPro(to);
+      proRaf = null;
+    }
   }
-}
-
-function animateTo(to) {
-  if (rafId) {
-    cancelAnimationFrame(rafId);
-    rafId = null;
-  }
-
-  tick.from = currentValue;
-  tick.to = to;
-  tick.start = performance.now();
-  rafId = requestAnimationFrame(tick);
+  proRaf = requestAnimationFrame(step);
 }
 
 function updatePricing() {
   const isYearly = billingToggle.checked;
-  const next = isYearly ? YEARLY : MONTHLY;
-
-  animateTo(next);
+  animatePro(isYearly ? YEARLY : MONTHLY);
   proPeriod.textContent = isYearly ? '/yr' : '/mo';
-
   labelYearly.classList.toggle('active', isYearly);
   labelMonthly.classList.toggle('active', !isYearly);
   saveBadge.classList.toggle('active', isYearly);
@@ -108,18 +93,17 @@ document.getElementById('waitlistForm').addEventListener('submit', function (e) 
   e.preventDefault();
   this.hidden = true;
   document.getElementById('formSuccess').hidden = false;
-  console.log('Waitlist signup:', this.querySelector('input[type="email"]').value);
 });
 
-// ========== Kill buttons + leakage counter ==========
+// ========== Kill buttons ==========
 const leakEl = document.getElementById('leakAmount');
 const annualEl = document.getElementById('annualSavings');
 
 let leakValue = 118.99;
-let annualValue = 1428;
-let leakRaf = null;
+let annualValue = 0;
+let moneyRaf = null;
 
-function formatMoney(n) {
+function formatLeak(n) {
   return '$' + n.toFixed(2);
 }
 
@@ -127,55 +111,66 @@ function formatAnnual(n) {
   return '$' + Math.round(n).toLocaleString('en-US');
 }
 
-function animateLeak(to) {
-  if (leakRaf) {
-    cancelAnimationFrame(leakRaf);
-    leakRaf = null;
-  }
+function pulse(el) {
+  el.classList.remove('pulse');
+  // force reflow so animation can replay
+  void el.offsetWidth;
+  el.classList.add('pulse');
+  setTimeout(() => el.classList.remove('pulse'), 220);
+}
 
-  const from = leakValue;
+function animateMoney(leakTo, annualTo) {
+  if (moneyRaf) cancelAnimationFrame(moneyRaf);
+
+  const leakFrom = leakValue;
   const annualFrom = annualValue;
-  const annualTo = to * 12;
   const start = performance.now();
-  const duration = 500;
+  const duration = 550;
 
   function step(now) {
-    const progress = Math.min((now - start) / duration, 1);
-    const eased = 1 - Math.pow(1 - progress, 3);
+    const t = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - t, 3);
 
-    leakValue = from + (to - from) * eased;
+    leakValue = leakFrom + (leakTo - leakFrom) * eased;
     annualValue = annualFrom + (annualTo - annualFrom) * eased;
 
-    leakEl.textContent = formatMoney(leakValue);
+    leakEl.textContent = formatLeak(leakValue);
     annualEl.textContent = formatAnnual(annualValue);
 
-    if (progress < 1) {
-      leakRaf = requestAnimationFrame(step);
+    if (t < 1) {
+      moneyRaf = requestAnimationFrame(step);
     } else {
-      leakValue = to;
+      leakValue = leakTo;
       annualValue = annualTo;
-      leakEl.textContent = formatMoney(to);
+      leakEl.textContent = formatLeak(leakTo);
       annualEl.textContent = formatAnnual(annualTo);
-      leakRaf = null;
+      moneyRaf = null;
     }
   }
 
-  leakRaf = requestAnimationFrame(step);
+  moneyRaf = requestAnimationFrame(step);
+  pulse(leakEl);
+  pulse(annualEl);
 }
 
 document.querySelectorAll('.kill-btn').forEach(btn => {
   btn.addEventListener('click', function () {
+    if (this.disabled) return;
+
     const row = this.closest('.sub-row');
-    if (!row || this.disabled) return;
+    const amount = parseFloat(row.getAttribute('data-amount')) || 0;
 
-    const amount = parseFloat(row.dataset.amount) || 0;
-
-    this.textContent = 'Killed';
-    this.style.background = '#22c55e';
+    // Button: fixed size, slowly turns green, text becomes Killed
     this.disabled = true;
-    row.style.opacity = '0.55';
+    this.classList.add('killed');
+    this.textContent = 'Killed';
 
-    const next = Math.max(0, leakValue - amount);
-    animateLeak(next);
+    // Row fades
+    row.classList.add('killed');
+
+    // Numbers: leakage down, annual savings up
+    const nextLeak = Math.max(0, +(leakValue - amount).toFixed(2));
+    const nextAnnual = +(annualValue + amount * 12).toFixed(2);
+    animateMoney(nextLeak, nextAnnual);
   });
 });
