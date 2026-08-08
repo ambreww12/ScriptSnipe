@@ -111,13 +111,71 @@ document.getElementById('waitlistForm').addEventListener('submit', function (e) 
   console.log('Waitlist signup:', this.querySelector('input[type="email"]').value);
 });
 
-// Kill buttons
+// ========== Kill buttons + leakage counter ==========
+const leakEl = document.getElementById('leakAmount');
+const annualEl = document.getElementById('annualSavings');
+
+let leakValue = 118.99;
+let annualValue = 1428;
+let leakRaf = null;
+
+function formatMoney(n) {
+  return '$' + n.toFixed(2);
+}
+
+function formatAnnual(n) {
+  return '$' + Math.round(n).toLocaleString('en-US');
+}
+
+function animateLeak(to) {
+  if (leakRaf) {
+    cancelAnimationFrame(leakRaf);
+    leakRaf = null;
+  }
+
+  const from = leakValue;
+  const annualFrom = annualValue;
+  const annualTo = to * 12;
+  const start = performance.now();
+  const duration = 500;
+
+  function step(now) {
+    const progress = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+
+    leakValue = from + (to - from) * eased;
+    annualValue = annualFrom + (annualTo - annualFrom) * eased;
+
+    leakEl.textContent = formatMoney(leakValue);
+    annualEl.textContent = formatAnnual(annualValue);
+
+    if (progress < 1) {
+      leakRaf = requestAnimationFrame(step);
+    } else {
+      leakValue = to;
+      annualValue = annualTo;
+      leakEl.textContent = formatMoney(to);
+      annualEl.textContent = formatAnnual(annualTo);
+      leakRaf = null;
+    }
+  }
+
+  leakRaf = requestAnimationFrame(step);
+}
+
 document.querySelectorAll('.kill-btn').forEach(btn => {
   btn.addEventListener('click', function () {
     const row = this.closest('.sub-row');
+    if (!row || this.disabled) return;
+
+    const amount = parseFloat(row.dataset.amount) || 0;
+
     this.textContent = 'Killed';
     this.style.background = '#22c55e';
     this.disabled = true;
     row.style.opacity = '0.55';
+
+    const next = Math.max(0, leakValue - amount);
+    animateLeak(next);
   });
 });
