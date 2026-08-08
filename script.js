@@ -1,4 +1,4 @@
-// Typewriter effect for the hero headline
+// Typewriter effect
 const typewriterText = document.getElementById('typewriter-text');
 const fullText = 'Stop paying for\nsubscriptions you forgot';
 let i = 0;
@@ -7,11 +7,7 @@ const speed = 55;
 function typeWriter() {
   if (i < fullText.length) {
     const char = fullText.charAt(i);
-    if (char === '\n') {
-      typewriterText.innerHTML += '<br>';
-    } else {
-      typewriterText.innerHTML += char;
-    }
+    typewriterText.innerHTML += char === '\n' ? '<br>' : char;
     i++;
     setTimeout(typeWriter, speed);
   } else {
@@ -24,103 +20,99 @@ function typeWriter() {
     }, 1800);
   }
 }
-
 setTimeout(typeWriter, 400);
 
-// Smooth scroll for navigation links
+// Smooth scroll
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
   anchor.addEventListener('click', function (e) {
     const targetId = this.getAttribute('href');
     if (targetId === '#') return;
-
     const target = document.querySelector(targetId);
     if (target) {
       e.preventDefault();
       const navHeight = document.querySelector('.nav').offsetHeight;
-      const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - navHeight - 12;
-
-      window.scrollTo({
-        top: targetPosition,
-        behavior: 'smooth'
-      });
+      const top = target.getBoundingClientRect().top + window.pageYOffset - navHeight - 12;
+      window.scrollTo({ top, behavior: 'smooth' });
     }
   });
 });
 
-// ========== Pricing Toggle + Number Counter ==========
+// ========== Pricing toggle (bulletproof) ==========
 const billingToggle = document.getElementById('billingToggle');
-const proAmount = document.getElementById('proAmount');
+const proPriceDisplay = document.getElementById('proPriceDisplay');
 const proPeriod = document.getElementById('proPeriod');
 const labelMonthly = document.getElementById('label-monthly');
 const labelYearly = document.getElementById('label-yearly');
 
-let displayedPrice = 2.99;
-let animationId = null;
+const MONTHLY = 2.99;
+const YEARLY = 19.99;
 
-function animatePrice(to, duration = 400) {
-  // Cancel any running animation
-  if (animationId) {
-    cancelAnimationFrame(animationId);
-    animationId = null;
+let currentValue = MONTHLY;
+let targetValue = MONTHLY;
+let rafId = null;
+
+function renderPrice(value) {
+  proPriceDisplay.textContent = '$' + value.toFixed(2);
+}
+
+function tick(now) {
+  if (!rafId) return; // cancelled
+
+  const start = tick.start;
+  const from = tick.from;
+  const to = tick.to;
+  const duration = 380;
+
+  const progress = Math.min((now - start) / duration, 1);
+  const eased = 1 - Math.pow(1 - progress, 3);
+  currentValue = from + (to - from) * eased;
+  renderPrice(currentValue);
+
+  if (progress < 1) {
+    rafId = requestAnimationFrame(tick);
+  } else {
+    currentValue = to;
+    renderPrice(to);
+    rafId = null;
+  }
+}
+
+function animateTo(to) {
+  targetValue = to;
+
+  if (rafId) {
+    cancelAnimationFrame(rafId);
+    rafId = null;
   }
 
-  const from = displayedPrice;
-  const start = performance.now();
-  const diff = to - from;
-
-  function tick(now) {
-    const elapsed = now - start;
-    const progress = Math.min(elapsed / duration, 1);
-    const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
-    const value = from + diff * eased;
-
-    displayedPrice = value;
-    proAmount.textContent = value.toFixed(2);
-
-    if (progress < 1) {
-      animationId = requestAnimationFrame(tick);
-    } else {
-      displayedPrice = to;
-      proAmount.textContent = to.toFixed(2);
-      animationId = null;
-    }
-  }
-
-  animationId = requestAnimationFrame(tick);
+  tick.from = currentValue;
+  tick.to = to;
+  tick.start = performance.now();
+  rafId = requestAnimationFrame(tick);
 }
 
 function updatePricing() {
   const isYearly = billingToggle.checked;
-  const target = isYearly ? 19.99 : 2.99;
+  const next = isYearly ? YEARLY : MONTHLY;
 
-  animatePrice(target);
+  animateTo(next);
   proPeriod.textContent = isYearly ? '/yr' : '/mo';
 
-  if (isYearly) {
-    labelYearly.classList.add('active');
-    labelMonthly.classList.remove('active');
-  } else {
-    labelMonthly.classList.add('active');
-    labelYearly.classList.remove('active');
-  }
+  labelYearly.classList.toggle('active', isYearly);
+  labelMonthly.classList.toggle('active', !isYearly);
 }
 
 billingToggle.addEventListener('change', updatePricing);
 
-// Waitlist form
+// Waitlist
 document.getElementById('waitlistForm').addEventListener('submit', function (e) {
   e.preventDefault();
-  const form = e.target;
-  const success = document.getElementById('formSuccess');
-
-  form.hidden = true;
-  success.hidden = false;
-
-  const email = form.querySelector('input[type="email"]').value;
-  console.log('Waitlist signup:', email);
+  this.hidden = true;
+  document.getElementById('formSuccess').hidden = false;
+  console.log('Waitlist signup:', this.querySelector('input[type="email"]').value);
 });
 
-// Mock Kill buttons
+// Kill buttons
 document.querySelectorAll('.kill-btn').forEach(btn => {
   btn.addEventListener('click', function () {
     const row = this.closest('.sub-row');

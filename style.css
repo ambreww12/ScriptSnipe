@@ -486,12 +486,16 @@ input:checked + .slider:before {
 }
 
 .price {
+  margin-bottom: 24px;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.price-value {
   font-size: 2.5rem;
   font-weight: 800;
   letter-spacing: -0.03em;
-  margin-bottom: 24px;
-  font-variant-numeric: tabular-nums;
-  line-height: 1.1;
+  color: var(--text);
 }
 
 .price .period {
@@ -499,12 +503,6 @@ input:checked + .slider:before {
   font-weight: 500;
   color: var(--muted);
   letter-spacing: 0;
-}
-
-#proAmount {
-  font-size: 2.5rem;
-  font-weight: 800;
-  letter-spacing: -0.03em;
 }
 
 .price-card ul {
