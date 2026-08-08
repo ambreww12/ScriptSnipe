@@ -2,7 +2,7 @@
 const typewriterText = document.getElementById('typewriter-text');
 const fullText = 'Stop paying for\nsubscriptions you forgot';
 let i = 0;
-const speed = 55; // ms per character
+const speed = 55;
 
 function typeWriter() {
   if (i < fullText.length) {
@@ -17,8 +17,10 @@ function typeWriter() {
   } else {
     setTimeout(() => {
       const cursor = document.querySelector('.cursor');
-      if (cursor) cursor.style.animation = 'none';
-      if (cursor) cursor.style.opacity = '0';
+      if (cursor) {
+        cursor.style.animation = 'none';
+        cursor.style.opacity = '0';
+      }
     }, 1800);
   }
 }
@@ -34,7 +36,6 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     const target = document.querySelector(targetId);
     if (target) {
       e.preventDefault();
-
       const navHeight = document.querySelector('.nav').offsetHeight;
       const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - navHeight - 12;
 
@@ -46,32 +47,64 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
   });
 });
 
-// Billing toggle (Monthly / Yearly)
+// ========== Pricing Toggle + Number Counter ==========
 const billingToggle = document.getElementById('billingToggle');
-const proPrice = document.getElementById('proPrice');
+const proAmount = document.getElementById('proAmount');
 const proPeriod = document.getElementById('proPeriod');
 const saveBadge = document.getElementById('saveBadge');
 const labelMonthly = document.getElementById('label-monthly');
 const labelYearly = document.getElementById('label-yearly');
 
+let currentPrice = 2.99;
+let animating = false;
+
+function animatePrice(from, to, duration = 450) {
+  if (animating) return;
+  animating = true;
+
+  const start = performance.now();
+  const diff = to - from;
+
+  function tick(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+
+    // easeOutCubic
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const value = from + diff * eased;
+
+    proAmount.textContent = value.toFixed(2);
+
+    if (progress < 1) {
+      requestAnimationFrame(tick);
+    } else {
+      proAmount.textContent = to.toFixed(2);
+      currentPrice = to;
+      animating = false;
+    }
+  }
+
+  requestAnimationFrame(tick);
+}
+
 function updatePricing() {
   const isYearly = billingToggle.checked;
 
   if (isYearly) {
-    proPrice.innerHTML = '$19.99<span id="proPeriod">/yr</span>';
+    animatePrice(currentPrice, 19.99);
+    proPeriod.textContent = '/yr';
     saveBadge.classList.add('visible');
     labelYearly.classList.add('active');
     labelMonthly.classList.remove('active');
   } else {
-    proPrice.innerHTML = '$2.99<span id="proPeriod">/mo</span>';
+    animatePrice(currentPrice, 2.99);
+    proPeriod.textContent = '/mo';
     saveBadge.classList.remove('visible');
     labelMonthly.classList.add('active');
     labelYearly.classList.remove('active');
   }
 }
 
-// Set initial state
-labelMonthly.classList.add('active');
 billingToggle.addEventListener('change', updatePricing);
 
 // Waitlist form
@@ -87,7 +120,7 @@ document.getElementById('waitlistForm').addEventListener('submit', function (e) 
   console.log('Waitlist signup:', email);
 });
 
-// Mock Kill buttons interaction
+// Mock Kill buttons
 document.querySelectorAll('.kill-btn').forEach(btn => {
   btn.addEventListener('click', function () {
     const row = this.closest('.sub-row');

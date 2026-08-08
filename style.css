@@ -58,15 +58,8 @@ a {
 }
 
 .logo {
-  font-weight: 800;
-  font-size: 1.25rem;
-  letter-spacing: -0.03em;
   display: flex;
   align-items: center;
-}
-
-.logo span {
-  color: var(--accent);
 }
 
 .nav-links {
@@ -371,13 +364,13 @@ a {
   padding: 90px 0;
 }
 
-/* Billing toggle */
+/* Billing toggle - centered */
 .billing-toggle {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  margin: -24px auto 40px;
+  gap: 14px;
+  margin: -20px auto 44px;
 }
 
 .toggle-label {
@@ -385,17 +378,21 @@ a {
   font-weight: 500;
   color: var(--muted);
   transition: color 0.2s;
+  min-width: 60px;
+  text-align: center;
 }
 
 .toggle-label.active {
   color: var(--text);
+  font-weight: 600;
 }
 
 .switch {
   position: relative;
   display: inline-block;
-  width: 48px;
-  height: 26px;
+  width: 52px;
+  height: 28px;
+  flex-shrink: 0;
 }
 
 .switch input {
@@ -414,19 +411,20 @@ a {
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: 34px;
-  transition: 0.25s;
+  transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .slider:before {
   position: absolute;
   content: "";
-  height: 18px;
-  width: 18px;
+  height: 20px;
+  width: 20px;
   left: 3px;
   bottom: 3px;
   background: var(--text);
   border-radius: 50%;
-  transition: 0.25s;
+  transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
 
 input:checked + .slider {
@@ -435,27 +433,28 @@ input:checked + .slider {
 }
 
 input:checked + .slider:before {
-  transform: translateX(22px);
+  transform: translateX(24px);
   background: white;
 }
 
 .save-badge {
   background: rgba(34, 197, 94, 0.15);
   color: var(--green);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 700;
   padding: 4px 10px;
   border-radius: 100px;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
   opacity: 0;
-  transform: scale(0.9);
-  transition: all 0.2s ease;
+  transform: translateX(-6px) scale(0.9);
+  transition: all 0.25s ease;
   pointer-events: none;
+  white-space: nowrap;
 }
 
 .save-badge.visible {
   opacity: 1;
-  transform: scale(1);
+  transform: translateX(0) scale(1);
 }
 
 .pricing-grid {
@@ -501,12 +500,19 @@ input:checked + .slider:before {
   font-weight: 800;
   letter-spacing: -0.03em;
   margin-bottom: 24px;
+  font-variant-numeric: tabular-nums;
 }
 
 .price span {
   font-size: 1rem;
   font-weight: 500;
   color: var(--muted);
+}
+
+#proAmount {
+  display: inline-block;
+  min-width: 2.8ch;
+  text-align: left;
 }
 
 .price-card ul {
@@ -613,10 +619,6 @@ details p {
   padding: 48px 0;
   border-top: 1px solid var(--border);
   text-align: center;
-}
-
-.footer .logo {
-  margin-bottom: 8px;
 }
 
 .footer p {

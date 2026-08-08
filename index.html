@@ -139,7 +139,7 @@
 
       <!-- Billing toggle -->
       <div class="billing-toggle">
-        <span class="toggle-label" id="label-monthly">Monthly</span>
+        <span class="toggle-label active" id="label-monthly">Monthly</span>
         <label class="switch">
           <input type="checkbox" id="billingToggle">
           <span class="slider"></span>
@@ -162,7 +162,9 @@
         <div class="price-card featured">
           <div class="popular">Most popular</div>
           <h3>Pro</h3>
-          <div class="price" id="proPrice">$2.99<span id="proPeriod">/mo</span></div>
+          <div class="price">
+            $<span id="proAmount">2.99</span><span id="proPeriod">/mo</span>
+          </div>
           <ul>
             <li>Everything in Free</li>
             <li>Unlimited one-click cancels</li>
