@@ -51,55 +51,55 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 const billingToggle = document.getElementById('billingToggle');
 const proAmount = document.getElementById('proAmount');
 const proPeriod = document.getElementById('proPeriod');
-const saveBadge = document.getElementById('saveBadge');
 const labelMonthly = document.getElementById('label-monthly');
 const labelYearly = document.getElementById('label-yearly');
 
-let currentPrice = 2.99;
-let animating = false;
+let displayedPrice = 2.99;
+let animationId = null;
 
-function animatePrice(from, to, duration = 450) {
-  if (animating) return;
-  animating = true;
+function animatePrice(to, duration = 400) {
+  // Cancel any running animation
+  if (animationId) {
+    cancelAnimationFrame(animationId);
+    animationId = null;
+  }
 
+  const from = displayedPrice;
   const start = performance.now();
   const diff = to - from;
 
   function tick(now) {
     const elapsed = now - start;
     const progress = Math.min(elapsed / duration, 1);
-
-    // easeOutCubic
-    const eased = 1 - Math.pow(1 - progress, 3);
+    const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
     const value = from + diff * eased;
 
+    displayedPrice = value;
     proAmount.textContent = value.toFixed(2);
 
     if (progress < 1) {
-      requestAnimationFrame(tick);
+      animationId = requestAnimationFrame(tick);
     } else {
+      displayedPrice = to;
       proAmount.textContent = to.toFixed(2);
-      currentPrice = to;
-      animating = false;
+      animationId = null;
     }
   }
 
-  requestAnimationFrame(tick);
+  animationId = requestAnimationFrame(tick);
 }
 
 function updatePricing() {
   const isYearly = billingToggle.checked;
+  const target = isYearly ? 19.99 : 2.99;
+
+  animatePrice(target);
+  proPeriod.textContent = isYearly ? '/yr' : '/mo';
 
   if (isYearly) {
-    animatePrice(currentPrice, 19.99);
-    proPeriod.textContent = '/yr';
-    saveBadge.classList.add('visible');
     labelYearly.classList.add('active');
     labelMonthly.classList.remove('active');
   } else {
-    animatePrice(currentPrice, 2.99);
-    proPeriod.textContent = '/mo';
-    saveBadge.classList.remove('visible');
     labelMonthly.classList.add('active');
     labelYearly.classList.remove('active');
   }

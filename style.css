@@ -268,7 +268,7 @@ a {
   color: var(--text);
 }
 
-/* How */
+/* Sections */
 .how {
   padding: 90px 0;
 }
@@ -364,7 +364,6 @@ a {
   padding: 90px 0;
 }
 
-/* Billing toggle - centered */
 .billing-toggle {
   display: flex;
   align-items: center;
@@ -445,16 +444,7 @@ input:checked + .slider:before {
   padding: 4px 10px;
   border-radius: 100px;
   letter-spacing: 0.04em;
-  opacity: 0;
-  transform: translateX(-6px) scale(0.9);
-  transition: all 0.25s ease;
-  pointer-events: none;
   white-space: nowrap;
-}
-
-.save-badge.visible {
-  opacity: 1;
-  transform: translateX(0) scale(1);
 }
 
 .pricing-grid {
@@ -501,18 +491,20 @@ input:checked + .slider:before {
   letter-spacing: -0.03em;
   margin-bottom: 24px;
   font-variant-numeric: tabular-nums;
+  line-height: 1.1;
 }
 
-.price span {
+.price .period {
   font-size: 1rem;
   font-weight: 500;
   color: var(--muted);
+  letter-spacing: 0;
 }
 
 #proAmount {
-  display: inline-block;
-  min-width: 2.8ch;
-  text-align: left;
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
 }
 
 .price-card ul {
