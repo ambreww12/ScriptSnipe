@@ -1,18 +1,46 @@
+// Typewriter effect for the hero headline
+const typewriterText = document.getElementById('typewriter-text');
+const fullText = 'Stop paying for\nsubscriptions you forgot';
+let i = 0;
+const speed = 55; // ms per character
+
+function typeWriter() {
+  if (i < fullText.length) {
+    const char = fullText.charAt(i);
+    if (char === '\n') {
+      typewriterText.innerHTML += '<br>';
+    } else {
+      typewriterText.innerHTML += char;
+    }
+    i++;
+    setTimeout(typeWriter, speed);
+  } else {
+    // Optional: stop the cursor blinking after a short delay
+    setTimeout(() => {
+      const cursor = document.querySelector('.cursor');
+      if (cursor) cursor.style.animation = 'none';
+      if (cursor) cursor.style.opacity = '0';
+    }, 1800);
+  }
+}
+
+// Start typing after a tiny delay so the page feels ready
+setTimeout(typeWriter, 400);
+
+// Waitlist form
 document.getElementById('waitlistForm').addEventListener('submit', function (e) {
   e.preventDefault();
   const form = e.target;
   const success = document.getElementById('formSuccess');
 
-  // For now just show success (replace with real backend later)
   form.hidden = true;
   success.hidden = false;
 
-  // Optional: log email for testing
   const email = form.querySelector('input[type="email"]').value;
   console.log('Waitlist signup:', email);
 });
 
-// Tiny interaction on the mock Kill buttons
+// Mock Kill buttons interaction
 document.querySelectorAll('.kill-btn').forEach(btn => {
   btn.addEventListener('click', function () {
     const row = this.closest('.sub-row');

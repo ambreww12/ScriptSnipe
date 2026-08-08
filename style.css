@@ -131,12 +131,27 @@ a {
   letter-spacing: 0.02em;
 }
 
-.hero h1 {
+.hero h1,
+.typewriter {
   font-size: clamp(2.4rem, 6vw, 3.8rem);
   font-weight: 800;
   letter-spacing: -0.04em;
-  line-height: 1.1;
+  line-height: 1.15;
   margin-bottom: 20px;
+  min-height: 2.4em; /* prevents layout jump while typing */
+}
+
+.cursor {
+  display: inline-block;
+  margin-left: 2px;
+  color: var(--accent);
+  animation: blink 0.8s step-end infinite;
+  font-weight: 400;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
 }
 
 .hero-sub {
@@ -539,5 +554,9 @@ details p {
 
   .hero {
     padding: 60px 0 40px;
+  }
+
+  .typewriter {
+    min-height: 2.8em;
   }
 }
