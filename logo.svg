@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 48" fill="none">
+  <!-- Text -->
+  <text x="0" y="34" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="32" font-weight="800" letter-spacing="-1.2" fill="#f4f4f5">ScriptSnipe</text>
+  
+  <!-- Red slash / sniper mark over the top -->
+  <line x1="8" y1="8" x2="52" y2="4" stroke="#ef4444" stroke-width="3.5" stroke-linecap="round"/>
+</svg>
