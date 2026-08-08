@@ -37,18 +37,18 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
   });
 });
 
-// ========== Pricing toggle (bulletproof) ==========
+// ========== Pricing toggle ==========
 const billingToggle = document.getElementById('billingToggle');
 const proPriceDisplay = document.getElementById('proPriceDisplay');
 const proPeriod = document.getElementById('proPeriod');
 const labelMonthly = document.getElementById('label-monthly');
 const labelYearly = document.getElementById('label-yearly');
+const saveBadge = document.querySelector('.save-badge');
 
 const MONTHLY = 2.99;
 const YEARLY = 19.99;
 
 let currentValue = MONTHLY;
-let targetValue = MONTHLY;
 let rafId = null;
 
 function renderPrice(value) {
@@ -56,7 +56,7 @@ function renderPrice(value) {
 }
 
 function tick(now) {
-  if (!rafId) return; // cancelled
+  if (!rafId) return;
 
   const start = tick.start;
   const from = tick.from;
@@ -78,8 +78,6 @@ function tick(now) {
 }
 
 function animateTo(to) {
-  targetValue = to;
-
   if (rafId) {
     cancelAnimationFrame(rafId);
     rafId = null;
@@ -100,6 +98,7 @@ function updatePricing() {
 
   labelYearly.classList.toggle('active', isYearly);
   labelMonthly.classList.toggle('active', !isYearly);
+  saveBadge.classList.toggle('active', isYearly);
 }
 
 billingToggle.addEventListener('change', updatePricing);
