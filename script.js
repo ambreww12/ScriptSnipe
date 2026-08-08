@@ -1,7 +1,6 @@
 (function () {
   'use strict';
 
-  // ---------- helpers ----------
   function $(sel, root) {
     return (root || document).querySelector(sel);
   }
@@ -101,9 +100,13 @@
       var target = yearly ? 19.99 : 2.99;
       setLabels(yearly);
       if (cancelAnim) cancelAnim();
-      cancelAnim = animateNumber(current, target, 380, function (v) {
+      var from = current;
+      cancelAnim = animateNumber(from, target, 380, function (v) {
         current = v;
         priceEl.textContent = '$' + v.toFixed(2);
+      }, function () {
+        current = target;
+        priceEl.textContent = '$' + target.toFixed(2);
       });
     });
   }
@@ -120,18 +123,23 @@
     });
   }
 
-  // ---------- KILL BUTTONS (the important part) ----------
+  // ---------- KILL BUTTONS ----------
+  // Source of truth updates IMMEDIATELY on click.
+  // Display animates toward that truth. Rapid clicks never lose amounts.
   function initKillButtons() {
     var leakEl = $('#leakAmount');
     var annualEl = $('#annualSavings');
     var list = $('#subsList');
-    if (!leakEl || !annualEl || !list) {
-      console.warn('Kill UI elements missing');
-      return;
-    }
+    if (!leakEl || !annualEl || !list) return;
 
-    var leak = 118.99;
-    var annual = 0;
+    // Committed values — always correct, updated instantly on kill
+    var committedLeak = 118.99;
+    var committedAnnual = 0;
+
+    // Display values — only for smooth animation
+    var displayLeak = 118.99;
+    var displayAnnual = 0;
+
     var cancelAnim = null;
 
     function formatLeak(n) {
@@ -139,6 +147,15 @@
     }
     function formatAnnual(n) {
       return '$' + Math.round(n).toLocaleString('en-US');
+    }
+
+    function applyZeroState() {
+      if (committedLeak <= 0.001) {
+        leakEl.classList.add('zero');
+        leakEl.textContent = '$0.00';
+      } else {
+        leakEl.classList.remove('zero');
+      }
     }
 
     function pulse(el) {
@@ -150,27 +167,31 @@
       }, 280);
     }
 
-    function updateMoney(nextLeak, nextAnnual) {
+    function animateToCommitted() {
       if (cancelAnim) cancelAnim();
-      var fromL = leak;
-      var fromA = annual;
+
+      var fromL = displayLeak;
+      var fromA = displayAnnual;
+      var toL = committedLeak;
+      var toA = committedAnnual;
+
       pulse(leakEl);
       pulse(annualEl);
-      cancelAnim = animateNumber(0, 1, 550, function (t) {
-        // t goes 0→1; interpolate both
-        leak = fromL + (nextLeak - fromL) * t;
-        annual = fromA + (nextAnnual - fromA) * t;
-        leakEl.textContent = formatLeak(leak);
-        annualEl.textContent = formatAnnual(annual);
+
+      cancelAnim = animateNumber(0, 1, 500, function (t) {
+        displayLeak = fromL + (toL - fromL) * t;
+        displayAnnual = fromA + (toA - fromA) * t;
+        leakEl.textContent = formatLeak(Math.max(0, displayLeak));
+        annualEl.textContent = formatAnnual(displayAnnual);
       }, function () {
-        leak = nextLeak;
-        annual = nextAnnual;
-        leakEl.textContent = formatLeak(leak);
-        annualEl.textContent = formatAnnual(annual);
+        displayLeak = toL;
+        displayAnnual = toA;
+        leakEl.textContent = formatLeak(Math.max(0, toL));
+        annualEl.textContent = formatAnnual(toA);
+        applyZeroState();
       });
     }
 
-    // Event delegation — works even if buttons are re-rendered
     list.addEventListener('click', function (e) {
       var btn = e.target.closest('.kill-btn');
       if (!btn || btn.classList.contains('killed') || btn.disabled) return;
@@ -181,22 +202,21 @@
       var amount = parseFloat(row.getAttribute('data-amount'));
       if (isNaN(amount) || amount <= 0) return;
 
-      // Button: fixed size, slowly turns green
+      // Mark button/row immediately
       btn.classList.add('killed');
       btn.textContent = 'Killed';
       btn.disabled = true;
-
-      // Row fades
       row.classList.add('killed');
 
-      // Leakage DOWN, annual savings UP
-      var nextLeak = Math.max(0, Math.round((leak - amount) * 100) / 100);
-      var nextAnnual = Math.round((annual + amount * 12) * 100) / 100;
-      updateMoney(nextLeak, nextAnnual);
+      // Commit math IMMEDIATELY (source of truth)
+      committedLeak = Math.max(0, Math.round((committedLeak - amount) * 100) / 100);
+      committedAnnual = Math.round((committedAnnual + amount * 12) * 100) / 100;
+
+      // Animate display toward the new committed values
+      animateToCommitted();
     });
   }
 
-  // ---------- boot ----------
   function boot() {
     initTypewriter();
     initSmoothScroll();

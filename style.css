@@ -200,6 +200,12 @@ a {
   color: #f87171;
 }
 
+/* Grey out once leakage hits zero */
+.card-header .leak.zero {
+  color: var(--muted);
+  opacity: 0.7;
+}
+
 .card-footer strong {
   color: var(--green);
   font-variant-numeric: tabular-nums;
@@ -251,7 +257,6 @@ a {
   margin-top: 2px;
 }
 
-/* Fixed-size kill button — never changes width/height */
 .kill-btn {
   background: var(--accent);
   color: white;
@@ -273,7 +278,6 @@ a {
   transform: scale(1.04);
 }
 
-/* Slowly turns green when killed */
 .kill-btn.killed,
 .kill-btn:disabled {
   background: var(--green);
