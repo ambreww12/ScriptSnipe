@@ -5,13 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ScriptSnipe – Stop Paying for Forgotten Subscriptions</title>
   <meta name="description" content="Find every subscription, rank them by real value, and cancel the ones wasting your money. One-click cancel + continuous monitoring." />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=3" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-  <!-- Nav -->
   <nav class="nav">
     <div class="container nav-inner">
       <a href="#" class="logo">
@@ -26,7 +25,6 @@
     </div>
   </nav>
 
-  <!-- Hero -->
   <header class="hero">
     <div class="container">
       <div class="badge">Aggressive subscription killer</div>
@@ -44,7 +42,7 @@
           <span>Monthly leakage</span>
           <strong class="leak" id="leakAmount">$118.99</strong>
         </div>
-        <div class="subs">
+        <div class="subs" id="subsList">
           <div class="sub-row" data-amount="69.99">
             <div class="sub-info">
               <span class="sub-name">Adobe Creative Cloud</span>
@@ -82,14 +80,12 @@
     </div>
   </header>
 
-  <!-- Social proof -->
   <section class="proof">
     <div class="container">
       <p>Average user finds <strong>$89 – $210</strong> in forgotten or low-value subscriptions</p>
     </div>
   </section>
 
-  <!-- How it works -->
   <section id="how" class="how">
     <div class="container">
       <h2>How it works</h2>
@@ -113,7 +109,6 @@
     </div>
   </section>
 
-  <!-- Difference -->
   <section id="diff" class="diff">
     <div class="container">
       <h2>Most apps just show you a list.</h2>
@@ -139,11 +134,9 @@
     </div>
   </section>
 
-  <!-- Pricing -->
   <section id="pricing" class="pricing">
     <div class="container">
       <h2>Simple pricing</h2>
-
       <div class="billing-toggle">
         <span class="toggle-label active" id="label-monthly">Monthly</span>
         <label class="switch">
@@ -151,15 +144,12 @@
           <span class="slider"></span>
         </label>
         <span class="toggle-label" id="label-yearly">Yearly</span>
-        <span class="save-badge">SAVE 45%</span>
+        <span class="save-badge" id="saveBadge">SAVE 45%</span>
       </div>
-
       <div class="pricing-grid">
         <div class="price-card">
           <h3>Free</h3>
-          <div class="price">
-            <span class="price-value">$0</span>
-          </div>
+          <div class="price"><span class="price-value">$0</span></div>
           <ul>
             <li>Full subscription detection</li>
             <li>Basic cancel help</li>
@@ -186,7 +176,6 @@
     </div>
   </section>
 
-  <!-- Waitlist -->
   <section id="waitlist" class="waitlist">
     <div class="container">
       <h2>Ready to stop the leaks?</h2>
@@ -200,7 +189,6 @@
     </div>
   </section>
 
-  <!-- FAQ -->
   <section id="faq" class="faq">
     <div class="container">
       <h2>FAQ</h2>
@@ -225,7 +213,6 @@
     </div>
   </section>
 
-  <!-- Footer -->
   <footer class="footer">
     <div class="container">
       <img src="logo.svg" alt="ScriptSnipe" height="24" style="margin-bottom: 8px;" />
@@ -234,6 +221,6 @@
     </div>
   </footer>
 
-  <script src="script.js"></script>
+  <script src="script.js?v=3"></script>
 </body>
 </html>

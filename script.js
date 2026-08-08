@@ -1,176 +1,213 @@
-// Typewriter effect
-const typewriterText = document.getElementById('typewriter-text');
-const fullText = 'Stop paying for\nsubscriptions you forgot';
-let i = 0;
-const speed = 55;
+(function () {
+  'use strict';
 
-function typeWriter() {
-  if (i < fullText.length) {
-    const char = fullText.charAt(i);
-    typewriterText.innerHTML += char === '\n' ? '<br>' : char;
-    i++;
-    setTimeout(typeWriter, speed);
-  } else {
-    setTimeout(() => {
-      const cursor = document.querySelector('.cursor');
-      if (cursor) {
-        cursor.style.animation = 'none';
-        cursor.style.opacity = '0';
+  // ---------- helpers ----------
+  function $(sel, root) {
+    return (root || document).querySelector(sel);
+  }
+  function $$(sel, root) {
+    return Array.from((root || document).querySelectorAll(sel));
+  }
+
+  function easeOutCubic(t) {
+    return 1 - Math.pow(1 - t, 3);
+  }
+
+  function animateNumber(from, to, duration, onUpdate, onDone) {
+    var start = null;
+    var raf = null;
+    function frame(now) {
+      if (start === null) start = now;
+      var t = Math.min((now - start) / duration, 1);
+      var value = from + (to - from) * easeOutCubic(t);
+      onUpdate(value);
+      if (t < 1) {
+        raf = requestAnimationFrame(frame);
+      } else {
+        onUpdate(to);
+        if (onDone) onDone();
       }
-    }, 1800);
+    }
+    raf = requestAnimationFrame(frame);
+    return function cancel() {
+      if (raf) cancelAnimationFrame(raf);
+    };
   }
-}
-setTimeout(typeWriter, 400);
 
-// Smooth scroll
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-  anchor.addEventListener('click', function (e) {
-    const targetId = this.getAttribute('href');
-    if (targetId === '#') return;
-    const target = document.querySelector(targetId);
-    if (target) {
+  // ---------- typewriter ----------
+  function initTypewriter() {
+    var el = $('#typewriter-text');
+    if (!el) return;
+    var full = 'Stop paying for\nsubscriptions you forgot';
+    var i = 0;
+    function tick() {
+      if (i >= full.length) {
+        setTimeout(function () {
+          var c = $('.cursor');
+          if (c) {
+            c.style.animation = 'none';
+            c.style.opacity = '0';
+          }
+        }, 1800);
+        return;
+      }
+      var ch = full.charAt(i);
+      el.innerHTML += ch === '\n' ? '<br>' : ch;
+      i++;
+      setTimeout(tick, 55);
+    }
+    setTimeout(tick, 400);
+  }
+
+  // ---------- smooth scroll ----------
+  function initSmoothScroll() {
+    $$('a[href^="#"]').forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        var id = a.getAttribute('href');
+        if (!id || id === '#') return;
+        var target = $(id);
+        if (!target) return;
+        e.preventDefault();
+        var nav = $('.nav');
+        var offset = nav ? nav.offsetHeight + 12 : 12;
+        var top = target.getBoundingClientRect().top + window.pageYOffset - offset;
+        window.scrollTo({ top: top, behavior: 'smooth' });
+      });
+    });
+  }
+
+  // ---------- pricing toggle ----------
+  function initPricing() {
+    var toggle = $('#billingToggle');
+    var priceEl = $('#proPriceDisplay');
+    var periodEl = $('#proPeriod');
+    var labelM = $('#label-monthly');
+    var labelY = $('#label-yearly');
+    var badge = $('#saveBadge');
+    if (!toggle || !priceEl) return;
+
+    var current = 2.99;
+    var cancelAnim = null;
+
+    function setLabels(yearly) {
+      if (labelY) labelY.classList.toggle('active', yearly);
+      if (labelM) labelM.classList.toggle('active', !yearly);
+      if (badge) badge.classList.toggle('active', yearly);
+      if (periodEl) periodEl.textContent = yearly ? '/yr' : '/mo';
+    }
+
+    toggle.addEventListener('change', function () {
+      var yearly = toggle.checked;
+      var target = yearly ? 19.99 : 2.99;
+      setLabels(yearly);
+      if (cancelAnim) cancelAnim();
+      cancelAnim = animateNumber(current, target, 380, function (v) {
+        current = v;
+        priceEl.textContent = '$' + v.toFixed(2);
+      });
+    });
+  }
+
+  // ---------- waitlist ----------
+  function initWaitlist() {
+    var form = $('#waitlistForm');
+    if (!form) return;
+    form.addEventListener('submit', function (e) {
       e.preventDefault();
-      const navHeight = document.querySelector('.nav').offsetHeight;
-      const top = target.getBoundingClientRect().top + window.pageYOffset - navHeight - 12;
-      window.scrollTo({ top, behavior: 'smooth' });
-    }
-  });
-});
-
-// ========== Pricing toggle ==========
-const billingToggle = document.getElementById('billingToggle');
-const proPriceDisplay = document.getElementById('proPriceDisplay');
-const proPeriod = document.getElementById('proPeriod');
-const labelMonthly = document.getElementById('label-monthly');
-const labelYearly = document.getElementById('label-yearly');
-const saveBadge = document.querySelector('.save-badge');
-
-const MONTHLY = 2.99;
-const YEARLY = 19.99;
-
-let proCurrent = MONTHLY;
-let proRaf = null;
-
-function renderPro(value) {
-  proPriceDisplay.textContent = '$' + value.toFixed(2);
-}
-
-function animatePro(to) {
-  if (proRaf) cancelAnimationFrame(proRaf);
-  const from = proCurrent;
-  const start = performance.now();
-  const duration = 380;
-
-  function step(now) {
-    const t = Math.min((now - start) / duration, 1);
-    const eased = 1 - Math.pow(1 - t, 3);
-    proCurrent = from + (to - from) * eased;
-    renderPro(proCurrent);
-    if (t < 1) {
-      proRaf = requestAnimationFrame(step);
-    } else {
-      proCurrent = to;
-      renderPro(to);
-      proRaf = null;
-    }
-  }
-  proRaf = requestAnimationFrame(step);
-}
-
-function updatePricing() {
-  const isYearly = billingToggle.checked;
-  animatePro(isYearly ? YEARLY : MONTHLY);
-  proPeriod.textContent = isYearly ? '/yr' : '/mo';
-  labelYearly.classList.toggle('active', isYearly);
-  labelMonthly.classList.toggle('active', !isYearly);
-  saveBadge.classList.toggle('active', isYearly);
-}
-
-billingToggle.addEventListener('change', updatePricing);
-
-// Waitlist
-document.getElementById('waitlistForm').addEventListener('submit', function (e) {
-  e.preventDefault();
-  this.hidden = true;
-  document.getElementById('formSuccess').hidden = false;
-});
-
-// ========== Kill buttons ==========
-const leakEl = document.getElementById('leakAmount');
-const annualEl = document.getElementById('annualSavings');
-
-let leakValue = 118.99;
-let annualValue = 0;
-let moneyRaf = null;
-
-function formatLeak(n) {
-  return '$' + n.toFixed(2);
-}
-
-function formatAnnual(n) {
-  return '$' + Math.round(n).toLocaleString('en-US');
-}
-
-function pulse(el) {
-  el.classList.remove('pulse');
-  // force reflow so animation can replay
-  void el.offsetWidth;
-  el.classList.add('pulse');
-  setTimeout(() => el.classList.remove('pulse'), 220);
-}
-
-function animateMoney(leakTo, annualTo) {
-  if (moneyRaf) cancelAnimationFrame(moneyRaf);
-
-  const leakFrom = leakValue;
-  const annualFrom = annualValue;
-  const start = performance.now();
-  const duration = 550;
-
-  function step(now) {
-    const t = Math.min((now - start) / duration, 1);
-    const eased = 1 - Math.pow(1 - t, 3);
-
-    leakValue = leakFrom + (leakTo - leakFrom) * eased;
-    annualValue = annualFrom + (annualTo - annualFrom) * eased;
-
-    leakEl.textContent = formatLeak(leakValue);
-    annualEl.textContent = formatAnnual(annualValue);
-
-    if (t < 1) {
-      moneyRaf = requestAnimationFrame(step);
-    } else {
-      leakValue = leakTo;
-      annualValue = annualTo;
-      leakEl.textContent = formatLeak(leakTo);
-      annualEl.textContent = formatAnnual(annualTo);
-      moneyRaf = null;
-    }
+      form.hidden = true;
+      var ok = $('#formSuccess');
+      if (ok) ok.hidden = false;
+    });
   }
 
-  moneyRaf = requestAnimationFrame(step);
-  pulse(leakEl);
-  pulse(annualEl);
-}
+  // ---------- KILL BUTTONS (the important part) ----------
+  function initKillButtons() {
+    var leakEl = $('#leakAmount');
+    var annualEl = $('#annualSavings');
+    var list = $('#subsList');
+    if (!leakEl || !annualEl || !list) {
+      console.warn('Kill UI elements missing');
+      return;
+    }
 
-document.querySelectorAll('.kill-btn').forEach(btn => {
-  btn.addEventListener('click', function () {
-    if (this.disabled) return;
+    var leak = 118.99;
+    var annual = 0;
+    var cancelAnim = null;
 
-    const row = this.closest('.sub-row');
-    const amount = parseFloat(row.getAttribute('data-amount')) || 0;
+    function formatLeak(n) {
+      return '$' + n.toFixed(2);
+    }
+    function formatAnnual(n) {
+      return '$' + Math.round(n).toLocaleString('en-US');
+    }
 
-    // Button: fixed size, slowly turns green, text becomes Killed
-    this.disabled = true;
-    this.classList.add('killed');
-    this.textContent = 'Killed';
+    function pulse(el) {
+      el.classList.remove('pulse');
+      void el.offsetWidth;
+      el.classList.add('pulse');
+      setTimeout(function () {
+        el.classList.remove('pulse');
+      }, 280);
+    }
 
-    // Row fades
-    row.classList.add('killed');
+    function updateMoney(nextLeak, nextAnnual) {
+      if (cancelAnim) cancelAnim();
+      var fromL = leak;
+      var fromA = annual;
+      pulse(leakEl);
+      pulse(annualEl);
+      cancelAnim = animateNumber(0, 1, 550, function (t) {
+        // t goes 0→1; interpolate both
+        leak = fromL + (nextLeak - fromL) * t;
+        annual = fromA + (nextAnnual - fromA) * t;
+        leakEl.textContent = formatLeak(leak);
+        annualEl.textContent = formatAnnual(annual);
+      }, function () {
+        leak = nextLeak;
+        annual = nextAnnual;
+        leakEl.textContent = formatLeak(leak);
+        annualEl.textContent = formatAnnual(annual);
+      });
+    }
 
-    // Numbers: leakage down, annual savings up
-    const nextLeak = Math.max(0, +(leakValue - amount).toFixed(2));
-    const nextAnnual = +(annualValue + amount * 12).toFixed(2);
-    animateMoney(nextLeak, nextAnnual);
-  });
-});
+    // Event delegation — works even if buttons are re-rendered
+    list.addEventListener('click', function (e) {
+      var btn = e.target.closest('.kill-btn');
+      if (!btn || btn.classList.contains('killed') || btn.disabled) return;
+
+      var row = btn.closest('.sub-row');
+      if (!row) return;
+
+      var amount = parseFloat(row.getAttribute('data-amount'));
+      if (isNaN(amount) || amount <= 0) return;
+
+      // Button: fixed size, slowly turns green
+      btn.classList.add('killed');
+      btn.textContent = 'Killed';
+      btn.disabled = true;
+
+      // Row fades
+      row.classList.add('killed');
+
+      // Leakage DOWN, annual savings UP
+      var nextLeak = Math.max(0, Math.round((leak - amount) * 100) / 100);
+      var nextAnnual = Math.round((annual + amount * 12) * 100) / 100;
+      updateMoney(nextLeak, nextAnnual);
+    });
+  }
+
+  // ---------- boot ----------
+  function boot() {
+    initTypewriter();
+    initSmoothScroll();
+    initPricing();
+    initWaitlist();
+    initKillButtons();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+})();
