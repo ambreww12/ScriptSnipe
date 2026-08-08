@@ -136,6 +136,18 @@
   <section id="pricing" class="pricing">
     <div class="container">
       <h2>Simple pricing</h2>
+
+      <!-- Billing toggle -->
+      <div class="billing-toggle">
+        <span class="toggle-label" id="label-monthly">Monthly</span>
+        <label class="switch">
+          <input type="checkbox" id="billingToggle">
+          <span class="slider"></span>
+        </label>
+        <span class="toggle-label" id="label-yearly">Yearly</span>
+        <span class="save-badge" id="saveBadge">SAVE 45%</span>
+      </div>
+
       <div class="pricing-grid">
         <div class="price-card">
           <h3>Free</h3>
@@ -150,7 +162,7 @@
         <div class="price-card featured">
           <div class="popular">Most popular</div>
           <h3>Pro</h3>
-          <div class="price">$2.99<span>/mo</span></div>
+          <div class="price" id="proPrice">$2.99<span id="proPeriod">/mo</span></div>
           <ul>
             <li>Everything in Free</li>
             <li>Unlimited one-click cancels</li>

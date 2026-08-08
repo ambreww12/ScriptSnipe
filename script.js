@@ -15,7 +15,6 @@ function typeWriter() {
     i++;
     setTimeout(typeWriter, speed);
   } else {
-    // Optional: stop the cursor blinking after a short delay
     setTimeout(() => {
       const cursor = document.querySelector('.cursor');
       if (cursor) cursor.style.animation = 'none';
@@ -24,10 +23,9 @@ function typeWriter() {
   }
 }
 
-// Start typing after a tiny delay so the page feels ready
 setTimeout(typeWriter, 400);
 
-// Smooth scroll for navigation links (accounts for sticky nav height)
+// Smooth scroll for navigation links
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
   anchor.addEventListener('click', function (e) {
     const targetId = this.getAttribute('href');
@@ -47,6 +45,34 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     }
   });
 });
+
+// Billing toggle (Monthly / Yearly)
+const billingToggle = document.getElementById('billingToggle');
+const proPrice = document.getElementById('proPrice');
+const proPeriod = document.getElementById('proPeriod');
+const saveBadge = document.getElementById('saveBadge');
+const labelMonthly = document.getElementById('label-monthly');
+const labelYearly = document.getElementById('label-yearly');
+
+function updatePricing() {
+  const isYearly = billingToggle.checked;
+
+  if (isYearly) {
+    proPrice.innerHTML = '$19.99<span id="proPeriod">/yr</span>';
+    saveBadge.classList.add('visible');
+    labelYearly.classList.add('active');
+    labelMonthly.classList.remove('active');
+  } else {
+    proPrice.innerHTML = '$2.99<span id="proPeriod">/mo</span>';
+    saveBadge.classList.remove('visible');
+    labelMonthly.classList.add('active');
+    labelYearly.classList.remove('active');
+  }
+}
+
+// Set initial state
+labelMonthly.classList.add('active');
+billingToggle.addEventListener('change', updatePricing);
 
 // Waitlist form
 document.getElementById('waitlistForm').addEventListener('submit', function (e) {
