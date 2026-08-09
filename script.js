@@ -33,7 +33,6 @@
     };
   }
 
-  // ---------- typewriter ----------
   function initTypewriter() {
     var el = $('#typewriter-text');
     if (!el) return;
@@ -101,7 +100,6 @@
     }
   }
 
-  // ---------- smooth scroll ----------
   function initSmoothScroll() {
     $$('a[href^="#"]').forEach(function (a) {
       a.addEventListener('click', function (e) {
@@ -118,7 +116,6 @@
     });
   }
 
-  // ---------- pricing toggle ----------
   function initPricing() {
     var toggle = $('#billingToggle');
     var priceEl = $('#proPriceDisplay');
@@ -160,16 +157,53 @@
     if (!form) return;
 
     var submitBtn = $('#waitlistSubmit');
+    var emailInput = form.querySelector('input[name="email"]');
     var successEl = $('#formSuccess');
     var errorEl = $('#formError');
+    var tipEl = $('#formAlreadyTip');
+    var wrap = $('#waitlistFormWrap');
     var FORMSPREE_URL = 'https://formspree.io/f/xppaqndr';
+    var submitted = false;
+
+    function lockForm() {
+      submitted = true;
+      form.classList.add('submitted');
+      if (emailInput) {
+        emailInput.disabled = true;
+        emailInput.readOnly = true;
+      }
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Joined';
+        submitBtn.classList.add('btn-disabled');
+      }
+    }
+
+    // Show tip on hover / focus of locked form controls
+    function showTip() {
+      if (!submitted || !tipEl) return;
+      tipEl.hidden = false;
+    }
+    function hideTip() {
+      if (!tipEl) return;
+      tipEl.hidden = true;
+    }
+
+    if (wrap) {
+      wrap.addEventListener('mouseenter', showTip);
+      wrap.addEventListener('mouseleave', hideTip);
+      wrap.addEventListener('focusin', showTip);
+      wrap.addEventListener('focusout', function (e) {
+        if (!wrap.contains(e.relatedTarget)) hideTip();
+      });
+    }
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
+      if (submitted) return;
 
       if (errorEl) errorEl.hidden = true;
 
-      var emailInput = form.querySelector('input[name="email"]');
       var email = emailInput ? emailInput.value.trim() : '';
       if (!email) return;
 
@@ -194,13 +228,13 @@
           return res.json();
         })
         .then(function () {
-          form.hidden = true;
+          lockForm();
           if (successEl) successEl.hidden = false;
           if (errorEl) errorEl.hidden = true;
         })
         .catch(function () {
           if (errorEl) errorEl.hidden = false;
-          if (submitBtn) {
+          if (submitBtn && !submitted) {
             submitBtn.disabled = false;
             submitBtn.textContent = 'Join Waitlist';
           }
@@ -208,7 +242,6 @@
     });
   }
 
-  // ---------- KILL BUTTONS ----------
   function initKillButtons() {
     var leakEl = $('#leakAmount');
     var annualEl = $('#annualSavings');
