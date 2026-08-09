@@ -33,6 +33,15 @@
     };
   }
 
+  function scrollToId(id) {
+    var target = $(id);
+    if (!target) return;
+    var nav = $('.nav');
+    var offset = nav ? nav.offsetHeight + 12 : 12;
+    var top = target.getBoundingClientRect().top + window.pageYOffset - offset;
+    window.scrollTo({ top: top, behavior: 'smooth' });
+  }
+
   function initTypewriter() {
     var el = $('#typewriter-text');
     if (!el) return;
@@ -108,11 +117,26 @@
         var target = $(id);
         if (!target) return;
         e.preventDefault();
-        var nav = $('.nav');
-        var offset = nav ? nav.offsetHeight + 12 : 12;
-        var top = target.getBoundingClientRect().top + window.pageYOffset - offset;
-        window.scrollTo({ top: top, behavior: 'smooth' });
+        scrollToId(id);
       });
+    });
+  }
+
+  // "Get my money back!" → scroll to waitlist and focus email
+  function initGetMyMoneyBack() {
+    var btn = $('#getmymoneyback');
+    if (!btn) return;
+
+    btn.addEventListener('click', function () {
+      scrollToId('#waitlist');
+
+      // Focus the email field after the smooth scroll finishes
+      setTimeout(function () {
+        var email = $('#waitlistForm input[name="email"]');
+        if (email && !email.disabled) {
+          email.focus();
+        }
+      }, 600);
     });
   }
 
@@ -151,7 +175,6 @@
     });
   }
 
-  // ---------- waitlist → Formspree ----------
   function initWaitlist() {
     var form = $('#waitlistForm');
     if (!form) return;
@@ -179,7 +202,6 @@
       }
     }
 
-    // Show tip on hover / focus of locked form controls
     function showTip() {
       if (!submitted || !tipEl) return;
       tipEl.hidden = false;
@@ -330,6 +352,7 @@
     initTypewriter();
     initAverageAmericanTypewriter();
     initSmoothScroll();
+    initGetMyMoneyBack();
     initPricing();
     initWaitlist();
     initKillButtons();
