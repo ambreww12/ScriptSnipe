@@ -58,6 +58,49 @@
     setTimeout(tick, 400);
   }
 
+  function initAverageAmericanTypewriter() {
+    var el = $('#average-american-text');
+    var cursor = $('.average-american-cursor');
+    var section = $('#averageAmerican');
+    if (!el || !cursor || !section) return;
+
+    var full = 'The average american wastes $21 a month on unused subscriptions.';
+    var i = 0;
+    var started = false;
+
+    function start() {
+      if (started) return;
+      started = true;
+
+      function tick() {
+        if (i >= full.length) {
+          setTimeout(function () {
+            cursor.style.animation = 'none';
+            cursor.style.opacity = '0';
+          }, 1800);
+          return;
+        }
+        el.textContent += full.charAt(i);
+        i++;
+        setTimeout(tick, 45);
+      }
+
+      tick();
+    }
+
+    if ('IntersectionObserver' in window) {
+      var observer = new IntersectionObserver(function (entries) {
+        if (entries[0].isIntersecting) {
+          start();
+          observer.disconnect();
+        }
+      }, { threshold: 0.2 });
+      observer.observe(section);
+    } else {
+      start();
+    }
+  }
+
   // ---------- smooth scroll ----------
   function initSmoothScroll() {
     $$('a[href^="#"]').forEach(function (a) {
@@ -219,6 +262,7 @@
 
   function boot() {
     initTypewriter();
+    initAverageAmericanTypewriter();
     initSmoothScroll();
     initPricing();
     initWaitlist();
