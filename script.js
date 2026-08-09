@@ -154,35 +154,71 @@
     });
   }
 
-  // ---------- waitlist ----------
+  // ---------- waitlist → Formspree ----------
   function initWaitlist() {
     var form = $('#waitlistForm');
     if (!form) return;
+
+    var submitBtn = $('#waitlistSubmit');
+    var successEl = $('#formSuccess');
+    var errorEl = $('#formError');
+    var FORMSPREE_URL = 'https://formspree.io/f/xppaqndr';
+
     form.addEventListener('submit', function (e) {
       e.preventDefault();
-      form.hidden = true;
-      var ok = $('#formSuccess');
-      if (ok) ok.hidden = false;
+
+      if (errorEl) errorEl.hidden = true;
+
+      var emailInput = form.querySelector('input[name="email"]');
+      var email = emailInput ? emailInput.value.trim() : '';
+      if (!email) return;
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Joining…';
+      }
+
+      fetch(FORMSPREE_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          email: email,
+          _subject: 'ScriptSnipe waitlist signup'
+        })
+      })
+        .then(function (res) {
+          if (!res.ok) throw new Error('Formspree error');
+          return res.json();
+        })
+        .then(function () {
+          form.hidden = true;
+          if (successEl) successEl.hidden = false;
+          if (errorEl) errorEl.hidden = true;
+        })
+        .catch(function () {
+          if (errorEl) errorEl.hidden = false;
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Join Waitlist';
+          }
+        });
     });
   }
 
   // ---------- KILL BUTTONS ----------
-  // Source of truth updates IMMEDIATELY on click.
-  // Display animates toward that truth. Rapid clicks never lose amounts.
   function initKillButtons() {
     var leakEl = $('#leakAmount');
     var annualEl = $('#annualSavings');
     var list = $('#subsList');
     if (!leakEl || !annualEl || !list) return;
 
-    // Committed values — always correct, updated instantly on kill
     var committedLeak = 118.99;
     var committedAnnual = 0;
-
-    // Display values — only for smooth animation
     var displayLeak = 118.99;
     var displayAnnual = 0;
-
     var cancelAnim = null;
 
     function formatLeak(n) {
@@ -245,17 +281,14 @@
       var amount = parseFloat(row.getAttribute('data-amount'));
       if (isNaN(amount) || amount <= 0) return;
 
-      // Mark button/row immediately
       btn.classList.add('killed');
       btn.textContent = 'Killed';
       btn.disabled = true;
       row.classList.add('killed');
 
-      // Commit math IMMEDIATELY (source of truth)
       committedLeak = Math.max(0, Math.round((committedLeak - amount) * 100) / 100);
       committedAnnual = Math.round((committedAnnual + amount * 12) * 100) / 100;
 
-      // Animate display toward the new committed values
       animateToCommitted();
     });
   }

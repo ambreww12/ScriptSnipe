@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ScriptSnipe – Stop Paying for Forgotten Subscriptions</title>
   <meta name="description" content="Find every subscription, rank them by real value, and cancel the ones wasting your money. One-click cancel + continuous monitoring." />
-  <link rel="stylesheet" href="style.css?v=4" />
+  <link rel="stylesheet" href="style.css?v=5" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -80,7 +80,6 @@
     </div>
   </header>
 
-
   <section id="how" class="how" style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding: 50px 0;">
     <div class="container">
       <h2>How it works</h2>
@@ -104,13 +103,13 @@
     </div>
   </section>
 
-  <section id="averageAmerican", class="diff", style="background-color: rgba(10, 10, 11, 0.85); padding: 50px 0; border-top: 1px solid rgba(255, 255, 255, 0.1); border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+  <section id="averageAmerican" class="diff" style="background-color: rgba(10, 10, 11, 0.85); padding: 50px 0; border-top: 1px solid rgba(255, 255, 255, 0.1); border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
     <div class="container">
       <h2 class="average-american-typewriter"><span id="average-american-text"></span><span class="cursor average-american-cursor">|</span></h2>
       <h3 class="diff-sub" style="color: #fff;">That's over <strong style="color: #da4a4a;">$250</strong> a year!</h3>
       <p class="diff-sub" id="averageAmericanText">Lets see how much you could save!</p>
-      <button id="getmymoneyback" class="btn btn-primary" style="align-self: center; align-items: center; align-content: center; align: center;">Get my money back!</button>
-      <img src="dollarbill.svg", alt="Dollar bill image" class="dollarbill">
+      <button id="getmymoneyback" class="btn btn-primary" style="align-self: center; align-items: center; align-content: center;">Get my money back!</button>
+      <img src="dollarbill.svg" alt="Dollar bill image" class="dollarbill">
     </div>
   </section>
 
@@ -186,12 +185,14 @@
     <div class="container">
       <h2>Ready to stop the leaks?</h2>
       <p>Join the waitlist. We’ll open access soon.</p>
-      <form class="waitlist-form" id="waitlistForm">
-        <input type="email" placeholder="Enter your email" required />
-        <button type="submit" class="btn btn-primary">Join Waitlist</button>
+      <form class="waitlist-form" id="waitlistForm" action="https://formspree.io/f/xppaqndr" method="POST">
+        <input type="email" name="email" placeholder="Enter your email" required />
+        <input type="hidden" name="_subject" value="ScriptSnipe waitlist signup" />
+        <button type="submit" class="btn btn-primary" id="waitlistSubmit">Join Waitlist</button>
       </form>
       <p class="form-note">No spam. Unsubscribe anytime.</p>
       <div id="formSuccess" class="success-msg" hidden>You're on the list. We'll be in touch.</div>
+      <div id="formError" class="error-msg" hidden>Something went wrong. Please try again.</div>
     </div>
   </section>
 
@@ -227,6 +228,6 @@
     </div>
   </footer>
 
-  <script src="script.js?v=4"></script>
+  <script src="script.js?v=5"></script>
 </body>
 </html>
